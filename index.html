@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>TravelPlan</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB2W3_S_3JlPN0De-YhThwG9bDHT1S7Irw&callback=initMap&libraries=&v=weekly"
+      defer
+    ></script>
+  <!-- 自サイトのCSS -->
+  <link rel="stylesheet" href="main.css">
+   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+</head>
+
+<body>
+  <!-- 最初のローディング表示 -->
+  <section id="loading" class="view">
+    <i class="initial-loading-icon fas fa-sync" aria-hidden="true"></i>
+  </section>
+  <!-- /#loading -->
+
+  <!-- ログイン画面 -->
+  <section id="login" class="view">
+           <div id="cover" class="col-md-12">
+      <h1 id="cover__title">Travel Plan</h1>
+    </div>  
+    <div class="container">
+ 
+      <div class="row justify-content-center">
+        <div class="col-sm-10 col-md-8 col-lg-6">
+          <form id="login-form">
+            <div id="login__email" class="form-group">
+              <label for="login-email" class="col-form-label">
+                メールアドレス
+              </label>
+              <div>
+                <input id="login-email" type="email" class="form-control" required>
+              </div>
+            </div>
+            <div id="login__password" class="form-group">
+              <label for="login-password" class="col-form-label">
+                パスワード
+              </label>
+              <div>
+                <input id="login-password" type="password" class="form-control" required>
+                <p class="form-text text-muted">
+                  初めての方は、登録するパスワードを入力してください
+                </p>
+              </div>
+            </div>
+
+            <div id="login__help" class="alert alert-danger"></div>
+            <div class="form-group login__submit">
+              <div>
+                <button id="login__submit-button" type="submit" class="btn btn-primary">
+                  ログイン
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- /#login -->
+
+  <!-- 一覧画面 -->
+  <section id = "travelplan" class="view">
+    <header>
+      <div id="header">
+        <div id="logo">
+          <a href="./index.html">TravelPlan</a>
+        </div>
+        <button class="btn btn-light logout-button">
+          ログアウト
+        </button>
+      </div>
+    </header>
+    
+    
+    <div id="cover">
+      <h1 id="cover__title">Travel Plan</h1>
+    </div>
+
+  <div id="main" class="container">
+   <div class="row">
+    <div id = "travel" class="travel col-md-6">
+      <h2>旅行計画</h2>
+      <ul id="list" class="list sortable">
+        <li v-for="(todo, index) in todos" class="item">
+          {{ todo }}
+          <span @click="deleteItem(index)" class="command">削除</span>          
+        </li>
+      </ul> 
+      <form @submit.prevent="addItem">
+        <input type="text" v-model="newItem">
+        <input type="submit" value="Add">
+      </form>
+    </div>  
+    
+    <div class="col-md-6 calender">
+      <h2>旅行日を決める</h2>
+      <table>
+        <thead>
+          <tr>
+            <th id="prev">&laquo;</th>
+            <th id="title" colspan="5">2020/05</th>
+            <th id="next">&raquo;</th>
+          </tr>
+          <tr>
+            <th>Sun</th>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td id="today" colspan="7">Today</td>
+          </tr>
+        </tfoot>
+    </table>
+  </div>
+  </div>
+  
+  
+  
+  <div class="row">
+      <div id ="mapdiv" class="col-md-6">
+         <h2>地図から探す</h2>
+       <div id="map"></div>
+      </div>      
+      <div id="app" class="col-md-6">
+        <div>
+          <h2>画像から探す</h2>
+          <form
+            class="form-inline justify-content-center"
+            v-on:submit.prevent="fetchImagesFromFlickr"
+            >
+          <input
+            type="search" name="search"
+            class="form-control"
+            placeholder="検索テキストを入力"
+            aria-label="Search"
+            >
+          <button
+            type="submit"
+            class="btn btn-outline-primary"
+            >
+              検索
+          </button>
+          </form>
+        </div>
+      <div class="row justify-content-center">
+        <a
+          v-for="photo in photos"
+          v-bind:key="photo.id"
+          v-bind:href="photo.pageURL"
+          v-tooltip="photo.text"
+          class="d-inline-block"
+          target="_blank"
+        >
+          <img
+            v-bind:src="photo.imageURL"
+            v-bind:alt="photo.text"
+            width="150"
+            height="150"
+          >
+        </a>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  </section>
+
+
+  <!-- Firebaseのセットアップコード（下記のSDKのバージョンは6.2.0） -->
+  <!-- The core Firebase JS SDK is always required and must be listed first 
+    (中心となるFirebase SDKです。常に必要で、最初に記述する必要があります) -->
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-app.js"></script>
+
+  <!-- TODO: Add SDKs for Firebase products that you want to use
+         https://firebase.google.com/docs/web/setup#config-web-app
+        (使いたいFirebaseサービス用のSDKを加えます) -->
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-storage.js"></script>
+
+  <!-- apiKeyなどは、ご自身の環境のものに合わせてください -->
+  <script>
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDNvPYGcu96ftMuNOJQyIp51ikPhsWCVV8",
+  authDomain: "realtime-chat-xxxxx.firebaseapp.com",
+  databaseURL: "https://realtime-chat-xxxxx.firebaseio.com",
+  projectId: 'realtime-chat-xxxx',
+  storageBucket: "realtime-chat-xxxxx.appspot.com",
+};
+  // Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <!-- Popper.js, 次に Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script src="main.js"></script>
+
+  <!-- Font Awesome -->
+  <script defer src="https://use.fontawesome.com/releases/v5.7.2/js/all.js"></script>
+  <script src="Sortable.min.js"></script>
+  <script>
+new Sortable(list, {
+  animation: 150,
+  ghostClass: 'blue-background-class'
+});  
+
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+</body>
+
+</html>
