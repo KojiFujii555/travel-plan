@@ -192,7 +192,7 @@ const vm = new Vue({
  * Flickr API 関連の関数
  * --------------------
  */
-const API_KEY = 'dd26807cdffac0aba4b972295481b724';
+const API_KEY = '';
 
 // 検索テキストに応じたデータを取得するためのURLを作成して返す
 const getRequestURL = (searchText) => {
